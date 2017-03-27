@@ -85,7 +85,7 @@ namespace encryption
             {
                 Console.WriteLine(asd[i]);
             }
-
+                        
             Console.ReadKey();
         }
     }
