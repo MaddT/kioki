@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
 
 namespace encryption.model.AsymmetricEncryption
 {
@@ -10,7 +11,14 @@ namespace encryption.model.AsymmetricEncryption
 
     public static class AsymmetricEncryption
     {
-        
+        //генерация большого числа, размеров определенного количества бит
+        public static BigInteger GetBigNumber(KeyAmount keyAmount)
+        {
+            int nBits = (int)keyAmount;
+            byte[] bytes = new byte[nBits / 8];
+            new Random().NextBytes(bytes);
+            return BigInteger.Abs(new BigInteger(bytes));
+        }
 
         //Решето Эратосфена
         public static int[] getSimplicityNumbers(int n)
