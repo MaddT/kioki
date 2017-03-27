@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using encryption.SymmetricEncryption;
+using encryption.model.SymmetricEncryption;
+using encryption.model.AsymmetricEncryption;
 
 namespace encryption
 {
@@ -23,7 +24,7 @@ namespace encryption
 
         static void Main(string[] args)
         {
-            string res;
+            string res;/*
             #region Метод "Железнодорожной изгороди"
             Console.WriteLine("Метод \"Железнодорожной изгороди\":");
             Console.WriteLine("Первичная информация: {0}", SOURCE1);
@@ -77,6 +78,13 @@ namespace encryption
             Console.WriteLine("После шифрования:     {0}", res);
             res = EncryptSymmetric.VigenereDeCipher(res, KEY6);
             Console.WriteLine("После дешифровки:     {0}\n", res);
+            */
+
+            int[] asd = AsymmetricEncryption.getSimplicityNumbers(1000);
+            for (int i = 0; i < asd.Length; i++)
+            {
+                Console.WriteLine(asd[i]);
+            }
 
             Console.ReadKey();
         }

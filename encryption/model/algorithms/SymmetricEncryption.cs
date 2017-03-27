@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace encryption.SymmetricEncryption
+namespace encryption.model.SymmetricEncryption
 {
     public enum AlphabetForEncryption { Latin, Cyrillic };
 
