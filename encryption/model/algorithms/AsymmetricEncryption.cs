@@ -20,6 +20,57 @@ namespace encryption.model.AsymmetricEncryption
             return BigInteger.Abs(new BigInteger(bytes));
         }
 
+        //проверка простоты методом Миллера — Рабина
+        private static bool checkSimplicity(BigInteger n, KeyAmount keyAmount)
+        {
+            int k = (int)keyAmount;         //размерность ключа
+            //исключаем числа делимые на простые числа от 2 до 256 либо к
+            int[] simpleNumberForCheck = getSimplicityNumbers(k < 256 ? 256 : k);
+            for (int i = 0; i < simpleNumberForCheck.Length; i++)
+            {
+                BigInteger remainder;
+                BigInteger.DivRem(n, new BigInteger(simpleNumberForCheck[i]), out remainder);
+                if (remainder.IsZero || n.CompareTo(new BigInteger(simpleNumberForCheck[i])) == 0) return false;
+            }
+
+            Random rnd = new Random();
+            int s = 0;
+            BigInteger nmm = BigInteger.Subtract(n, BigInteger.One);
+            BigInteger t = nmm;
+            //вычисляем коэффициенты t и s
+            do
+            {
+                t = BigInteger.Divide(t, new BigInteger(2));
+                s++;
+                BigInteger remainder;
+                BigInteger.DivRem(t, new BigInteger(2), out remainder);
+                if (remainder != 0) break;
+            } while (true);
+
+            //проверяем условия простоты
+            for (int i = 0; i < k; i++)
+            {
+                BigInteger a;
+                for (;;)
+                {
+                    a = rnd.NextBigInteger(n);
+                    if (nmm.CompareTo(a) > 0 && a.CompareTo(new BigInteger(2)) >= 0) break;
+                }
+                //проверяем сравнимость по модулю
+                BigInteger x = BigInteger.ModPow(a, t, n);
+                if (x.IsOne || x.CompareTo(nmm) == 0) continue;
+                for (int j = 1; j < s; j++)
+                {
+                    x = BigInteger.ModPow(x, new BigInteger(2), n);
+                    if (x.IsOne) return false;                      //составное
+                    if (x.CompareTo(nmm) == 0) goto ff;             //перейти на следующую проверку
+                }
+                return false;                                       //составное
+            ff:;
+            }
+            return true;
+        }
+
         //Решето Эратосфена
         public static int[] getSimplicityNumbers(int n)
         {
