@@ -11,8 +11,31 @@ namespace encryption.model.AsymmetricEncryption
 
     public static class AsymmetricEncryption
     {
+        //алгоритм Евклида
+        public static Tuple<BigInteger, BigInteger, BigInteger> EuclidEx(BigInteger a, BigInteger b)
+        {
+            BigInteger d0 = a;
+            BigInteger d1 = b;
+            BigInteger x0 = 1;
+            BigInteger x1 = 0;
+            BigInteger y0 = 0;
+            BigInteger y1 = 1;
+            while (d1 > 1)
+            {
+                BigInteger q = BigInteger.Divide(d0, d1);
+                BigInteger d2;
+                BigInteger.DivRem(d0, d1, out d2);
+                BigInteger x2 = BigInteger.Subtract(x0, BigInteger.Multiply(q, x1));
+                BigInteger y2 = BigInteger.Subtract(y0, BigInteger.Multiply(q, y1));
+                d0 = d1; d1 = d2;
+                x0 = x1; x1 = x2;
+                y0 = y1; y1 = y2;
+            }
+            return new Tuple<BigInteger, BigInteger, BigInteger>(x1, y1, d1);
+        }
+
         //генерация большого числа, размеров определенного количества бит
-        public static BigInteger GetBigNumber(KeyAmount keyAmount)
+        private static BigInteger GetBigNumber(KeyAmount keyAmount)
         {
             int nBits = (int)keyAmount;
             byte[] bytes = new byte[nBits / 8];
@@ -25,7 +48,7 @@ namespace encryption.model.AsymmetricEncryption
         {
             int k = (int)keyAmount;         //размерность ключа
             //исключаем числа делимые на простые числа от 2 до 256 либо к
-            int[] simpleNumberForCheck = getSimplicityNumbers(k < 256 ? 256 : k);
+            int[] simpleNumberForCheck = getSimplicityNumbers(k <= 256 ? 256 : k);
             for (int i = 0; i < simpleNumberForCheck.Length; i++)
             {
                 BigInteger remainder;
@@ -72,7 +95,7 @@ namespace encryption.model.AsymmetricEncryption
         }
 
         //Решето Эратосфена
-        public static int[] getSimplicityNumbers(int n)
+        private static int[] getSimplicityNumbers(int n)
         {
             //массив чисел от 0 до n включительно
             int[] numbers = new int[n + 1];
@@ -124,7 +147,7 @@ namespace encryption.model.AsymmetricEncryption
                 byte[] bytes = bigN.ToByteArray();
                 rnd.NextBytes(bytes);
                 int bitsToRemove = rnd.Next(bytes.Length * 8);      //количество обнуляемых бит
-                int kk = bytes.Length - 1;
+                int kk = bytes.Length - 1;                          //индекс обрабатываемого байта
                 for (int i = 0; i < bitsToRemove; i += 8)
                 {
                     //обнуляем целый байт

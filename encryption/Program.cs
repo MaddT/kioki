@@ -80,13 +80,14 @@ namespace encryption
             Console.WriteLine("После дешифровки:     {0}\n", res);
             */
 
-            int[] asd = AsymmetricEncryption.getSimplicityNumbers(1000);
-            for (int i = 0; i < asd.Length; i++)
-            {
-                Console.WriteLine(asd[i]);
-            }
-                        
+            var res1 = AsymmetricEncryption.EuclidEx(15, 49);
+            Console.WriteLine(res1.Item1);
+            Console.WriteLine(res1.Item2);
+            Console.WriteLine(res1.Item3);
+            
+
             Console.ReadKey();
         }
+        
     }
 }
