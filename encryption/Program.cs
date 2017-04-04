@@ -79,12 +79,10 @@ namespace encryption
             res = EncryptSymmetric.VigenereDeCipher(res, KEY6);
             Console.WriteLine("После дешифровки:     {0}\n", res);
             */
-
-            var res1 = AsymmetricEncryption.EuclidEx(15, 49);
-            Console.WriteLine(res1.Item1);
-            Console.WriteLine(res1.Item2);
-            Console.WriteLine(res1.Item3);
-            
+            DateTime time = DateTime.Now;
+            Console.WriteLine(AsymmetricEncryption.GetSimpleNumber(KeyAmount.b1024));
+            TimeSpan per = DateTime.Now - time;
+            Console.WriteLine(per);
 
             Console.ReadKey();
         }

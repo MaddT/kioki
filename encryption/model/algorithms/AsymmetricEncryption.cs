@@ -7,12 +7,26 @@ using System.Numerics;
 
 namespace encryption.model.AsymmetricEncryption
 {
-    public enum KeyAmount { b256 = 256, b512 = 512, b1024 = 1024, b2048 = 2048, b4096 = 4096 };
+    public enum KeyAmount { b32 = 32, b64 = 64, b128 = 128, b256 = 256, b512 = 512, b1024 = 1024, b2048 = 2048 };
 
     public static class AsymmetricEncryption
     {
+        private static Random rnd = new Random();
+
+        //получить простое число, размерностью b бит
+        public static BigInteger GetSimpleNumber(KeyAmount b = KeyAmount.b1024)
+        {
+            BigInteger result;
+            while (true)
+            {
+                result = GetBigNumber(b);
+                if (checkSimplicity(result, b)) break;
+            }
+            return result;
+        }
+
         //алгоритм Евклида
-        public static Tuple<BigInteger, BigInteger, BigInteger> EuclidEx(BigInteger a, BigInteger b)
+        private static Tuple<BigInteger, BigInteger, BigInteger> EuclidEx(BigInteger a, BigInteger b)
         {
             BigInteger d0 = a;
             BigInteger d1 = b;
@@ -39,7 +53,7 @@ namespace encryption.model.AsymmetricEncryption
         {
             int nBits = (int)keyAmount;
             byte[] bytes = new byte[nBits / 8];
-            new Random().NextBytes(bytes);
+            rnd.NextBytes(bytes);
             return BigInteger.Abs(new BigInteger(bytes));
         }
 
@@ -71,7 +85,8 @@ namespace encryption.model.AsymmetricEncryption
             } while (true);
 
             //проверяем условия простоты
-            for (int i = 0; i < k; i++)
+            int kk = 30720 / k;
+            for (int i = 0; i < kk; i++)
             {
                 BigInteger a;
                 for (;;)
