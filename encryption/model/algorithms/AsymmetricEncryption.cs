@@ -13,8 +13,35 @@ namespace encryption.model.AsymmetricEncryption
     {
         private static Random rnd = new Random();
 
+        //генерация ключей для алгоритма RSA
+        public static Tuple<Tuple<BigInteger, BigInteger>, Tuple<BigInteger, BigInteger>> GetRSAKeys(KeyAmount b = KeyAmount.b1024)
+        {
+            BigInteger p = GetSimpleNumber(b);
+            BigInteger q = GetSimpleNumber(b);
+            BigInteger n = BigInteger.Multiply(p, q);
+            BigInteger phin = BigInteger.Multiply(BigInteger.Subtract(p, BigInteger.One), BigInteger.Subtract(q, BigInteger.One));
+            BigInteger d;
+            BigInteger e;
+            do
+            {
+                e = BigInteger.Add(rnd.NextBigInteger(BigInteger.Subtract(phin, BigInteger.One)), BigInteger.One);
+                var nod = EuclidEx(phin, e);
+                if (nod.Item3.IsOne)
+                {
+                    if (nod.Item2 < 0) d = BigInteger.Add(nod.Item2, phin);
+                    else d = nod.Item2;
+                    break;
+                }
+            } while (true);
+
+            if (e == d) return GetRSAKeys(b);
+            return new Tuple<Tuple<BigInteger, BigInteger>, Tuple<BigInteger, BigInteger>>(
+                new Tuple<BigInteger, BigInteger>(e, n),
+                new Tuple<BigInteger, BigInteger>(d, n));
+        }
+
         //получить простое число, размерностью b бит
-        public static BigInteger GetSimpleNumber(KeyAmount b = KeyAmount.b1024)
+        private static BigInteger GetSimpleNumber(KeyAmount b = KeyAmount.b1024)
         {
             BigInteger result;
             while (true)

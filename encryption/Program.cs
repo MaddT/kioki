@@ -80,8 +80,10 @@ namespace encryption
             Console.WriteLine("После дешифровки:     {0}\n", res);
             */
             DateTime time = DateTime.Now;
-            Console.WriteLine(AsymmetricEncryption.GetSimpleNumber(KeyAmount.b1024));
+            var rsaKeys = AsymmetricEncryption.GetRSAKeys(KeyAmount.b32);
             TimeSpan per = DateTime.Now - time;
+            Console.WriteLine("Открытый ключ: ({0}, {1})\nЗакрытый ключ: ({2}, {3})", rsaKeys.Item1.Item1, rsaKeys.Item1.Item2,
+                rsaKeys.Item2.Item1, rsaKeys.Item2.Item2);
             Console.WriteLine(per);
 
             Console.ReadKey();
