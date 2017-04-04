@@ -7,17 +7,38 @@ using System.Numerics;
 
 namespace encryption.model.AsymmetricEncryption
 {
-    public enum KeyAmount { b32 = 32, b64 = 64, b128 = 128, b256 = 256, b512 = 512, b1024 = 1024, b2048 = 2048 };
+    public enum KeyAmount {b8 = 8, b16 = 16, b32 = 32, b64 = 64, b128 = 128, b256 = 256, b512 = 512, b1024 = 1024, b2048 = 2048 };
 
     public static class AsymmetricEncryption
     {
         private static Random rnd = new Random();
+
+        //расшифровка RSA - string
+        public static string RSADecrypt(BigInteger[] source, Tuple<BigInteger, BigInteger> key)
+        {
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < source.Length; i++)
+                result.Append((char)(int)BigInteger.ModPow(source[i], key.Item1, key.Item2));
+            return result.ToString();
+        }
+
+        //шифрование RSA - string
+        public static BigInteger[] RSAEncrypt(string source, Tuple<BigInteger, BigInteger> key)
+        {
+            //StringBuilder result = new StringBuilder();
+            BigInteger[] result = new BigInteger[source.Length];
+            char[] symbols = source.ToCharArray();
+            for (int i = 0; i < symbols.Length; i++)
+                result[i] = BigInteger.ModPow(symbols[i], key.Item1, key.Item2);
+            return result;
+        }
 
         //генерация ключей для алгоритма RSA
         public static Tuple<Tuple<BigInteger, BigInteger>, Tuple<BigInteger, BigInteger>> GetRSAKeys(KeyAmount b = KeyAmount.b1024)
         {
             BigInteger p = GetSimpleNumber(b);
             BigInteger q = GetSimpleNumber(b);
+            Console.WriteLine("p: {0}\nq: {1}", p, q);
             BigInteger n = BigInteger.Multiply(p, q);
             BigInteger phin = BigInteger.Multiply(BigInteger.Subtract(p, BigInteger.One), BigInteger.Subtract(q, BigInteger.One));
             BigInteger d;
