@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="model\algorithms\AsymmetricEncryption.cs" />
+    <Compile Include="model\algorithms\DigitalSignature.cs" />
     <Compile Include="model\algorithms\SymmetricEncryption.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

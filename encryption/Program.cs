@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using encryption.model.SymmetricEncryption;
 using encryption.model.AsymmetricEncryption;
 using System.Numerics;
+using encryption.model.DigitalSignature;
 
 namespace encryption
 {
@@ -85,27 +86,16 @@ namespace encryption
             TimeSpan per = DateTime.Now - time;
             
             string str = "My string for Dogs";
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 5; i++)
                 str += str;
             time = DateTime.Now;
 
-            var keys = AsymmetricEncryption.GetElGamalKeys(KeyAmount.b32);
+            //str = "ПолесГУ";
+            BigInteger big = DigitalSignature.GetHash(str, AsymmetricEncryption.GetSimpleNumber(KeyAmount.b32) * AsymmetricEncryption.GetSimpleNumber(KeyAmount.b32));
 
             per = DateTime.Now - time;
             Console.WriteLine("Estimate time(generate keys): {0}", per);
-            Console.WriteLine("Открытый ключ: ({0}, {1}, {2})", keys.Item1.Item1, keys.Item1.Item2, keys.Item1.Item3);
-            Console.WriteLine("Закрытый ключ: ({0})", keys.Item2.Item1);
-
-            time = DateTime.Now;
-            BigInteger[] big1 = AsymmetricEncryption.ElGamalEncrypt(str, keys.Item1);
-            per = DateTime.Now - time;
-            Console.WriteLine("Estimate time(encrypt): {0}", per);
-           
-            time = DateTime.Now;
-            str = AsymmetricEncryption.ElGamalDecrypt(big1, keys.Item2, keys.Item1);
-            per = DateTime.Now - time;
-            Console.WriteLine("Estimate time(decrypt): {0}", per);
-            Console.WriteLine("Result: {0}", str);            
+            Console.WriteLine(big);
 
             Console.ReadKey();
         }

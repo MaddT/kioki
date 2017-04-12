@@ -134,7 +134,7 @@ namespace encryption.model.AsymmetricEncryption
         }
 
         //получить простое число, размерностью b бит
-        private static BigInteger GetSimpleNumber(KeyAmount b = KeyAmount.b1024)
+        public static BigInteger GetSimpleNumber(KeyAmount b = KeyAmount.b1024)
         {
             BigInteger result;
             while (true)
