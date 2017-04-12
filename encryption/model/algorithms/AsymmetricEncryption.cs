@@ -30,7 +30,8 @@ namespace encryption.model.AsymmetricEncryption
             char[] symbols = source.ToCharArray();
             for (int i = 0; i < symbols.Length; i++)
             {
-                do {
+                do
+                {
                     k = rnd.NextBigInteger(key.Item1 - 3) + 2;
                 } while (EuclidEx(k, key.Item1 - 1).Item3 != 1);
                 result[2 * i] = BigInteger.ModPow(key.Item2, k, key.Item1);
@@ -95,6 +96,13 @@ namespace encryption.model.AsymmetricEncryption
             return result.ToString();
         }
 
+        //расшифровка RSA - BigInteger
+        public static BigInteger RSADecrypt(BigInteger source, Tuple<BigInteger, BigInteger> key)
+        {
+            BigInteger result = BigInteger.ModPow(source, key.Item1, key.Item2);
+            return result;
+        }
+
         //шифрование RSA - string
         public static BigInteger[] RSAEncrypt(string source, Tuple<BigInteger, BigInteger> key)
         {
@@ -103,6 +111,13 @@ namespace encryption.model.AsymmetricEncryption
             char[] symbols = source.ToCharArray();
             for (int i = 0; i < symbols.Length; i++)
                 result[i] = BigInteger.ModPow(symbols[i], key.Item1, key.Item2);
+            return result;
+        }
+
+        //шифрование RSA - BigInteger
+        public static BigInteger RSAEncrypt(BigInteger source, Tuple<BigInteger, BigInteger> key)
+        {
+            BigInteger result = BigInteger.ModPow(source, key.Item1, key.Item2);
             return result;
         }
 
@@ -129,8 +144,8 @@ namespace encryption.model.AsymmetricEncryption
 
             if (e == d) return GetRSAKeys(b);
             return new Tuple<Tuple<BigInteger, BigInteger>, Tuple<BigInteger, BigInteger>>(
-                new Tuple<BigInteger, BigInteger>(e, n),
-                new Tuple<BigInteger, BigInteger>(d, n));
+                new Tuple<BigInteger, BigInteger>(e, n),        //open
+                new Tuple<BigInteger, BigInteger>(d, n));       //close
         }
 
         //получить простое число, размерностью b бит

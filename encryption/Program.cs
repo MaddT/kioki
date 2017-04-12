@@ -88,14 +88,19 @@ namespace encryption
             string str = "My string for Dogs";
             for (int i = 0; i < 5; i++)
                 str += str;
+            str = "ПолесГУ";
             time = DateTime.Now;
+            BigInteger n = AsymmetricEncryption.GetSimpleNumber(KeyAmount.b256) * AsymmetricEncryption.GetSimpleNumber(KeyAmount.b256);
+            var RSAKeys = AsymmetricEncryption.GetRSAKeys(KeyAmount.b512);
+            var message = DigitalSignature.MakeRSASign(str, RSAKeys.Item2, n);
+            bool res1 = DigitalSignature.CheckRSASign("ПолемГУ", message.Item2, RSAKeys.Item1, n);
+            bool res2 = DigitalSignature.CheckRSASign(str, message.Item2, RSAKeys.Item1, n);
 
-            //str = "ПолесГУ";
-            BigInteger big = DigitalSignature.GetHash(str, AsymmetricEncryption.GetSimpleNumber(KeyAmount.b32) * AsymmetricEncryption.GetSimpleNumber(KeyAmount.b32));
 
             per = DateTime.Now - time;
-            Console.WriteLine("Estimate time(generate keys): {0}", per);
-            Console.WriteLine(big);
+            Console.WriteLine("Estimate time(sign): {0}", per);
+            Console.WriteLine("ПолесГУ -> ПолемГУ: " + res1);
+            Console.WriteLine("ПолесГУ -> ПолесГУ: " + res2);
 
             Console.ReadKey();
         }
