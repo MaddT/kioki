@@ -81,26 +81,25 @@ namespace encryption
             Console.WriteLine("После дешифровки:     {0}\n", res);
             */
             DateTime time = DateTime.Now;
-            var rsaKeys = AsymmetricEncryption.GetRSAKeys(KeyAmount.b256);
+            
             TimeSpan per = DateTime.Now - time;
-            Console.WriteLine("Estimate time(generate keys): {0}", per);
-            Console.WriteLine("Открытый ключ: ({0}, {1})\nЗакрытый ключ: ({2}, {3})", rsaKeys.Item1.Item1, rsaKeys.Item1.Item2,
-                rsaKeys.Item2.Item1, rsaKeys.Item2.Item2);
-
+            
             string str = "My string for Dogs";
             for (int i = 0; i < 5; i++)
                 str += str;
             time = DateTime.Now;
-            BigInteger[] sss = AsymmetricEncryption.RSAEncrypt(str, rsaKeys.Item1);
+
+            BigInteger big = AsymmetricEncryption.GetPrimitiveRoot(AsymmetricEncryption.GetSimpleNumber(KeyAmount.b32));
+
             per = DateTime.Now - time;
             Console.WriteLine("Estimate time(encrypt): {0}", per);
-
-            time = DateTime.Now;
-            string sstr = AsymmetricEncryption.RSADecrypt(sss, rsaKeys.Item2);
+            Console.WriteLine(big);
+            /*time = DateTime.Now;
+            
             per = DateTime.Now - time;
-            Console.WriteLine("Estimate time(decrypt): {0}", per);
-            Console.WriteLine(sstr);
-            Console.WriteLine(sstr.Length);
+            Console.WriteLine("Estimate time(decrypt): {0}", per);*/
+            
+            
 
             Console.ReadKey();
         }

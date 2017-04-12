@@ -13,6 +13,41 @@ namespace encryption.model.AsymmetricEncryption
     {
         private static Random rnd = new Random();
 
+        //возвращает первообразный корень по модулю p
+        public static BigInteger GetPrimitiveRoot(BigInteger p)
+        {
+            List<BigInteger> fact = new List<BigInteger>();
+            BigInteger phi = BigInteger.Subtract(p, BigInteger.One);
+            BigInteger n = phi;
+            for (BigInteger i = 2; BigInteger.Multiply(i, i) <= n; i = BigInteger.Add(i, BigInteger.One))
+            {
+                BigInteger remainder;
+                BigInteger.DivRem(n, i, out remainder);
+                //Console.WriteLine(i + " " + remainder);
+                if (remainder.IsZero)
+                {
+                    fact.Add(i);
+                    while (remainder.IsZero)
+                    {
+                        n = BigInteger.Divide(n, i);
+                        BigInteger.DivRem(n, i, out remainder);
+                    }
+                }
+            }
+
+            if (n > BigInteger.One) fact.Add(n);
+
+            for (BigInteger res = 2; res < p; res = BigInteger.Add(res, BigInteger.One))
+            {
+                bool ok = true;
+                for (int i = 0; i < fact.Count() && ok; i++)
+                    ok = ok && (BigInteger.ModPow(res, BigInteger.Divide(phi, fact[i]), p) != BigInteger.One);
+                if (ok) return res;
+            }
+
+            return BigInteger.MinusOne;
+        }
+
         //расшифровка RSA - string
         public static string RSADecrypt(BigInteger[] source, Tuple<BigInteger, BigInteger> key)
         {
@@ -62,7 +97,7 @@ namespace encryption.model.AsymmetricEncryption
         }
 
         //получить простое число, размерностью b бит
-        private static BigInteger GetSimpleNumber(KeyAmount b = KeyAmount.b1024)
+        public static BigInteger GetSimpleNumber(KeyAmount b = KeyAmount.b1024)
         {
             BigInteger result;
             while (true)
