@@ -7,14 +7,53 @@ using System.Numerics;
 
 namespace encryption.model.AsymmetricEncryption
 {
-    public enum KeyAmount {b8 = 8, b16 = 16, b32 = 32, b64 = 64, b128 = 128, b256 = 256, b512 = 512, b1024 = 1024, b2048 = 2048 };
+    public enum KeyAmount { b8 = 8, b16 = 16, b32 = 32, b64 = 64, b128 = 128, b256 = 256, b512 = 512, b1024 = 1024, b2048 = 2048 };
 
     public static class AsymmetricEncryption
     {
         private static Random rnd = new Random();
 
+        //расшифровка El-Gamal - string
+        public static string ElGamalDecrypt(BigInteger[] source, Tuple<BigInteger> key, Tuple<BigInteger, BigInteger, BigInteger> key1)
+        {
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < source.Length / 2; i++)
+                result.Append((char)(int)(BigInteger.ModPow(BigInteger.Multiply(BigInteger.ModPow(source[i * 2], BigInteger.Multiply(key.Item1, BigInteger.Subtract(key1.Item1, 2)), key1.Item1), source[i * 2 + 1]), 1, key1.Item1)));
+            return result.ToString();
+        }
+
+        //шифрование El-Gamal - string
+        public static BigInteger[] ElGamalEncrypt(string source, Tuple<BigInteger, BigInteger, BigInteger> key)
+        {
+            BigInteger[] result = new BigInteger[source.Length * 2];
+            BigInteger k;
+            char[] symbols = source.ToCharArray();
+            for (int i = 0; i < symbols.Length; i++)
+            {
+                do {
+                    k = rnd.NextBigInteger(key.Item1 - 3) + 2;
+                } while (EuclidEx(k, key.Item1 - 1).Item3 != 1);
+                result[2 * i] = BigInteger.ModPow(key.Item2, k, key.Item1);
+                result[2 * i + 1] = BigInteger.ModPow(BigInteger.Multiply(BigInteger.ModPow(key.Item3, k, key.Item1), new BigInteger(symbols[i])), 1, key.Item1);
+            }
+            return result;
+        }
+
+        //генерация ключей для алгоритма Эль-Гамаля
+        public static Tuple<Tuple<BigInteger, BigInteger, BigInteger>, Tuple<BigInteger>> GetElGamalKeys(KeyAmount b = KeyAmount.b1024)
+        {
+            BigInteger p = GetSimpleNumber(b);
+            BigInteger g = GetPrimitiveRoot(p);
+            BigInteger x = rnd.NextBigInteger(p - 3) + 2;
+            BigInteger y = BigInteger.ModPow(g, x, p);
+            return new Tuple<Tuple<BigInteger, BigInteger, BigInteger>, Tuple<BigInteger>>(
+                new Tuple<BigInteger, BigInteger, BigInteger>(p, g, y),
+                new Tuple<BigInteger>(x)
+                );
+        }
+
         //возвращает первообразный корень по модулю p
-        public static BigInteger GetPrimitiveRoot(BigInteger p)
+        private static BigInteger GetPrimitiveRoot(BigInteger p)
         {
             List<BigInteger> fact = new List<BigInteger>();
             BigInteger phi = BigInteger.Subtract(p, BigInteger.One);
@@ -23,7 +62,6 @@ namespace encryption.model.AsymmetricEncryption
             {
                 BigInteger remainder;
                 BigInteger.DivRem(n, i, out remainder);
-                //Console.WriteLine(i + " " + remainder);
                 if (remainder.IsZero)
                 {
                     fact.Add(i);
@@ -73,7 +111,6 @@ namespace encryption.model.AsymmetricEncryption
         {
             BigInteger p = GetSimpleNumber(b);
             BigInteger q = GetSimpleNumber(b);
-            Console.WriteLine("p: {0}\nq: {1}", p, q);
             BigInteger n = BigInteger.Multiply(p, q);
             BigInteger phin = BigInteger.Multiply(BigInteger.Subtract(p, BigInteger.One), BigInteger.Subtract(q, BigInteger.One));
             BigInteger d;
@@ -97,7 +134,7 @@ namespace encryption.model.AsymmetricEncryption
         }
 
         //получить простое число, размерностью b бит
-        public static BigInteger GetSimpleNumber(KeyAmount b = KeyAmount.b1024)
+        private static BigInteger GetSimpleNumber(KeyAmount b = KeyAmount.b1024)
         {
             BigInteger result;
             while (true)
