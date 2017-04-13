@@ -10,18 +10,37 @@ namespace encryption.model.DigitalSignature
 {
     public static class DigitalSignature
     {
+        //проверка электронной подписи RSA
+        public static bool CheckDSASign(Tuple<string, BigInteger, BigInteger> input, Tuple<Tuple<BigInteger, BigInteger, BigInteger, BigInteger>, Tuple<BigInteger>> keys, BigInteger n)
+        {
+            BigInteger w;
+            var sad = AsymmetricEncryption.AsymmetricEncryption.EuclidEx(keys.Item1.Item1, input.Item3);
+            if (sad.Item2 < 0) w = sad.Item2 + keys.Item1.Item1;
+            else w = sad.Item2;
+            BigInteger hash = GetHash(input.Item1, n);
+            BigInteger u1 = BigInteger.ModPow(BigInteger.Multiply(hash, w), 1, keys.Item1.Item1);
+            BigInteger u2 = BigInteger.ModPow(BigInteger.Multiply(input.Item2, w), 1, keys.Item1.Item1);
+
+            BigInteger v = BigInteger.ModPow(BigInteger.Multiply(BigInteger.ModPow(keys.Item1.Item3, u1, keys.Item1.Item2), BigInteger.ModPow(keys.Item1.Item4, u2, keys.Item1.Item2)), 1, keys.Item1.Item2);
+            v = BigInteger.ModPow(v, 1, keys.Item1.Item1);
+
+            return v == input.Item2;
+        }
+
         //создание электронной подписи DSA
         public static Tuple<string, BigInteger, BigInteger> MakeDSASign(string source, Tuple<Tuple<BigInteger, BigInteger, BigInteger, BigInteger>, Tuple<BigInteger>> keys, BigInteger n)
         {
-            //Console.WriteLine("q : {0}, p : {1}, g : {2}, y : {3} ", keys.Item1.Item1, keys.Item1.Item2, keys.Item1.Item3, keys.Item1.Item4);
-            //Console.WriteLine("x : {0}", keys.Item2.Item1);
             BigInteger hash = GetHash(source, n);
-            BigInteger k = new Random().NextBigInteger(keys.Item1.Item1);
+            BigInteger k;
             BigInteger kMO;
-            var ress = AsymmetricEncryption.AsymmetricEncryption.EuclidEx(keys.Item1.Item1, k);
-            if (ress.Item2 < 0) kMO = ress.Item2 + keys.Item1.Item1;
-            else kMO = ress.Item2;
-            Console.WriteLine(kMO);
+            do
+            {
+                k = new Random().NextBigInteger(keys.Item1.Item1);
+                var ress = AsymmetricEncryption.AsymmetricEncryption.EuclidEx(keys.Item1.Item1, k);
+                if (ress.Item2 < 0) kMO = ress.Item2 + keys.Item1.Item1;
+                else kMO = ress.Item2;
+            } while (kMO.IsOne);
+            
 
             BigInteger r = BigInteger.ModPow(BigInteger.ModPow(keys.Item1.Item3, k, keys.Item1.Item2), 1, keys.Item1.Item1);
 
@@ -90,35 +109,34 @@ namespace encryption.model.DigitalSignature
         {
             BigInteger result = 150;
             for (int i = 0; i < s.Length; i++)
-            {                
+            {
                 result = BigInteger.ModPow(BigInteger.Add(result, new BigInteger(s[i])), 2, n);
             }
 
             return result;
         }
 
-        public static Int16 GetSimple()
+        public static BigInteger GetSimple()
         {
             Random rnd = new Random();
-            Int16 a, b;
+            byte[] bb = new byte[2];
+            
+            BigInteger big; 
             while (true)
             {
-                a = (short)(rnd.Next(253) + 3);
+                rnd.NextBytes(bb);
+                big = BigInteger.Abs(new BigInteger(bb));
                 bool cond = false;
-                for (int i = 2; i < a; i++)
-                    if (a % i == 0) cond = true;
-                if (!cond) break;
-            }
-            while (true)
-            {
-                b = (short)rnd.Next(256);
-                bool cond = false;
-                for (int i = 2; i < a; i++)
-                    if (a % i == 0) cond = true;
+                for (BigInteger i = 2; i < big; i++)
+                {
+                    BigInteger renainder;
+                    BigInteger.DivRem(big, i, out renainder);
+                    if (renainder.IsZero) cond = true;
+                }
                 if (!cond) break;
             }
 
-            return (short)(a * b);
+            return big;
         }
     }
 }

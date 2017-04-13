@@ -91,14 +91,20 @@ namespace encryption
             str = "ПолесГУ";
             time = DateTime.Now;
             BigInteger n = DigitalSignature.GetSimple();
+
             var keys = DigitalSignature.DSAKeys(KeyAmount.b16);
-            var mess = DigitalSignature.MakeDSASign(str, new Tuple<Tuple<BigInteger, BigInteger, BigInteger, BigInteger>, Tuple<BigInteger>>(new Tuple<BigInteger, BigInteger, BigInteger, BigInteger>(61, 367, 64, 323), new Tuple<BigInteger>(35)), n);
+            var mess = DigitalSignature.MakeDSASign(str, keys, n);
+
+            bool sd = DigitalSignature.CheckDSASign(mess, keys, n);
+            mess = new Tuple<string, BigInteger, BigInteger>("ПолемГУ", mess.Item2, mess.Item3);
+            bool sd1 = DigitalSignature.CheckDSASign(mess, keys, n);
 
             per = DateTime.Now - time;
             Console.WriteLine("Estimate time(DSAK): {0}", per);
-            Console.WriteLine(n);
-
             Console.WriteLine("DSA: ({0}, {1}, {2})", str, mess.Item2, mess.Item3);
+            Console.WriteLine("ПолесГУ -> ПолесГУ: {0}", sd);
+            Console.WriteLine("ПолесГУ -> ПолемГУ: {0}", sd1);
+            
 
             Console.WriteLine();
            
