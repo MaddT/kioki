@@ -90,16 +90,18 @@ namespace encryption
                 str += str;
             str = "ПолесГУ";
             time = DateTime.Now;
-
+            BigInteger n = DigitalSignature.GetSimple();
             var keys = DigitalSignature.DSAKeys(KeyAmount.b16);
+            var mess = DigitalSignature.MakeDSASign(str, new Tuple<Tuple<BigInteger, BigInteger, BigInteger, BigInteger>, Tuple<BigInteger>>(new Tuple<BigInteger, BigInteger, BigInteger, BigInteger>(61, 367, 64, 323), new Tuple<BigInteger>(35)), n);
 
             per = DateTime.Now - time;
             Console.WriteLine("Estimate time(DSAK): {0}", per);
-            Console.WriteLine(keys.Item1.Item1);
-            Console.WriteLine(keys.Item1.Item2);
-            Console.WriteLine(keys.Item1.Item3);
+            Console.WriteLine(n);
+
+            Console.WriteLine("DSA: ({0}, {1}, {2})", str, mess.Item2, mess.Item3);
+
             Console.WriteLine();
-            Console.WriteLine(keys.Item2.Item1);
+           
 
             Console.ReadKey();
         }

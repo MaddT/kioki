@@ -161,7 +161,7 @@ namespace encryption.model.AsymmetricEncryption
         }
 
         //алгоритм Евклида
-        private static Tuple<BigInteger, BigInteger, BigInteger> EuclidEx(BigInteger a, BigInteger b)
+        public static Tuple<BigInteger, BigInteger, BigInteger> EuclidEx(BigInteger a, BigInteger b)
         {
             BigInteger d0 = a;
             BigInteger d1 = b;

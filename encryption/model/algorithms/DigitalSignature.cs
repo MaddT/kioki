@@ -10,8 +10,30 @@ namespace encryption.model.DigitalSignature
 {
     public static class DigitalSignature
     {
+        //создание электронной подписи DSA
+        public static Tuple<string, BigInteger, BigInteger> MakeDSASign(string source, Tuple<Tuple<BigInteger, BigInteger, BigInteger, BigInteger>, Tuple<BigInteger>> keys, BigInteger n)
+        {
+            //Console.WriteLine("q : {0}, p : {1}, g : {2}, y : {3} ", keys.Item1.Item1, keys.Item1.Item2, keys.Item1.Item3, keys.Item1.Item4);
+            //Console.WriteLine("x : {0}", keys.Item2.Item1);
+            BigInteger hash = GetHash(source, n);
+            BigInteger k = new Random().NextBigInteger(keys.Item1.Item1);
+            BigInteger kMO;
+            var ress = AsymmetricEncryption.AsymmetricEncryption.EuclidEx(keys.Item1.Item1, k);
+            if (ress.Item2 < 0) kMO = ress.Item2 + keys.Item1.Item1;
+            else kMO = ress.Item2;
+            Console.WriteLine(kMO);
+
+            BigInteger r = BigInteger.ModPow(BigInteger.ModPow(keys.Item1.Item3, k, keys.Item1.Item2), 1, keys.Item1.Item1);
+
+            BigInteger s = BigInteger.ModPow(BigInteger.Multiply(kMO, BigInteger.Add(hash, BigInteger.Multiply(keys.Item2.Item1, r))), 1, keys.Item1.Item1);
+
+            return new Tuple<string, BigInteger, BigInteger>(
+                source, r, s
+                );
+        }
+
         //генерация ключей DSA
-        public static Tuple<Tuple<BigInteger, BigInteger, BigInteger>, Tuple<BigInteger>> DSAKeys(KeyAmount b)
+        public static Tuple<Tuple<BigInteger, BigInteger, BigInteger, BigInteger>, Tuple<BigInteger>> DSAKeys(KeyAmount b)
         {
             BigInteger q = AsymmetricEncryption.AsymmetricEncryption.GetSimpleNumber(b);
             BigInteger p;
@@ -40,8 +62,8 @@ namespace encryption.model.DigitalSignature
             BigInteger x = rnd.NextBigInteger(q);
             BigInteger y = BigInteger.ModPow(g, x, p);
 
-            return new Tuple<Tuple<BigInteger, BigInteger, BigInteger>, Tuple<BigInteger>>(
-                new Tuple<BigInteger, BigInteger, BigInteger>(q, p, y),
+            return new Tuple<Tuple<BigInteger, BigInteger, BigInteger, BigInteger>, Tuple<BigInteger>>(
+                new Tuple<BigInteger, BigInteger, BigInteger, BigInteger>(q, p, g, y),
                 new Tuple<BigInteger>(x)
                 );
         }
@@ -73,6 +95,30 @@ namespace encryption.model.DigitalSignature
             }
 
             return result;
+        }
+
+        public static Int16 GetSimple()
+        {
+            Random rnd = new Random();
+            Int16 a, b;
+            while (true)
+            {
+                a = (short)(rnd.Next(253) + 3);
+                bool cond = false;
+                for (int i = 2; i < a; i++)
+                    if (a % i == 0) cond = true;
+                if (!cond) break;
+            }
+            while (true)
+            {
+                b = (short)rnd.Next(256);
+                bool cond = false;
+                for (int i = 2; i < a; i++)
+                    if (a % i == 0) cond = true;
+                if (!cond) break;
+            }
+
+            return (short)(a * b);
         }
     }
 }
