@@ -10,6 +10,42 @@ namespace encryption.model.DigitalSignature
 {
     public static class DigitalSignature
     {
+        //генерация ключей DSA
+        public static Tuple<Tuple<BigInteger, BigInteger, BigInteger>, Tuple<BigInteger>> DSAKeys(KeyAmount b)
+        {
+            BigInteger q = AsymmetricEncryption.AsymmetricEncryption.GetSimpleNumber(b);
+            BigInteger p;
+            BigInteger reminder;
+            BigInteger a = BigInteger.Zero;
+
+            do
+            {
+                p = AsymmetricEncryption.AsymmetricEncryption.GetSimpleNumber((KeyAmount)((int)b * 2));
+                BigInteger.DivRem(BigInteger.Subtract(p, BigInteger.One), q, out reminder);
+                if (++a == 100)
+                {
+                    a = BigInteger.Zero;
+                    q = AsymmetricEncryption.AsymmetricEncryption.GetSimpleNumber(b);
+                }
+            } while (!reminder.IsZero);
+
+            Random rnd = new Random();
+            BigInteger h = rnd.NextBigInteger(p - 3) + 2;
+            BigInteger g;
+            while (true)
+            {
+                g = BigInteger.ModPow(h, BigInteger.Divide(BigInteger.Subtract(p, BigInteger.One), q), p);
+                if (!g.IsOne) break;
+            }
+            BigInteger x = rnd.NextBigInteger(q);
+            BigInteger y = BigInteger.ModPow(g, x, p);
+
+            return new Tuple<Tuple<BigInteger, BigInteger, BigInteger>, Tuple<BigInteger>>(
+                new Tuple<BigInteger, BigInteger, BigInteger>(q, p, y),
+                new Tuple<BigInteger>(x)
+                );
+        }
+
         //проверка электронной подписи RSA
         public static bool CheckRSASign(string source, BigInteger sign, Tuple<BigInteger, BigInteger> openKey, BigInteger n)
         {

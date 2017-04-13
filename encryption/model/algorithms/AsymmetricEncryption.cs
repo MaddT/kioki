@@ -184,7 +184,7 @@ namespace encryption.model.AsymmetricEncryption
         }
 
         //генерация большого числа, размеров определенного количества бит
-        private static BigInteger GetBigNumber(KeyAmount keyAmount)
+        public static BigInteger GetBigNumber(KeyAmount keyAmount)
         {
             int nBits = (int)keyAmount;
             byte[] bytes = new byte[nBits / 8];
@@ -193,7 +193,7 @@ namespace encryption.model.AsymmetricEncryption
         }
 
         //проверка простоты методом Миллера — Рабина
-        private static bool checkSimplicity(BigInteger n, KeyAmount keyAmount)
+        public static bool checkSimplicity(BigInteger n, KeyAmount keyAmount)
         {
             int k = (int)keyAmount;         //размерность ключа
             //исключаем числа делимые на простые числа от 2 до 256 либо к

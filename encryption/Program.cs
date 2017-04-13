@@ -90,17 +90,16 @@ namespace encryption
                 str += str;
             str = "ПолесГУ";
             time = DateTime.Now;
-            BigInteger n = AsymmetricEncryption.GetSimpleNumber(KeyAmount.b256) * AsymmetricEncryption.GetSimpleNumber(KeyAmount.b256);
-            var RSAKeys = AsymmetricEncryption.GetRSAKeys(KeyAmount.b512);
-            var message = DigitalSignature.MakeRSASign(str, RSAKeys.Item2, n);
-            bool res1 = DigitalSignature.CheckRSASign("ПолемГУ", message.Item2, RSAKeys.Item1, n);
-            bool res2 = DigitalSignature.CheckRSASign(str, message.Item2, RSAKeys.Item1, n);
 
+            var keys = DigitalSignature.DSAKeys(KeyAmount.b16);
 
             per = DateTime.Now - time;
-            Console.WriteLine("Estimate time(sign): {0}", per);
-            Console.WriteLine("ПолесГУ -> ПолемГУ: " + res1);
-            Console.WriteLine("ПолесГУ -> ПолесГУ: " + res2);
+            Console.WriteLine("Estimate time(DSAK): {0}", per);
+            Console.WriteLine(keys.Item1.Item1);
+            Console.WriteLine(keys.Item1.Item2);
+            Console.WriteLine(keys.Item1.Item3);
+            Console.WriteLine();
+            Console.WriteLine(keys.Item2.Item1);
 
             Console.ReadKey();
         }
