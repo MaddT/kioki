@@ -91,31 +91,13 @@ namespace encryption
             //    str += str;
             //str = "ПолесГУ";
             time = DateTime.Now;
-            var keys = ZeroKnowledgeProofs.FiatShamirKeys();
+
+            Console.WriteLine(ZeroKnowledgeProofs.PHI(11398));
 
             per = DateTime.Now - time;
             Console.WriteLine("Estimate time(DSAK): {0}", per);
-            Console.WriteLine("v: {0}, n: {1}, s: {2}", keys.Item1.Item1, keys.Item1.Item2, keys.Item2.Item1);
 
-            bool check = true;
-            for (int i = 0; i < 1; i++)
-            {
-                //1
-                var rx = ZeroKnowledgeProofs.FiatShamirFirst(keys.Item1);
-                long x = rx.Item2;
-                long r = rx.Item1;
-
-                //2
-                long e = ZeroKnowledgeProofs.FiatShamirSecond();
-
-                //3
-                long y = ZeroKnowledgeProofs.FiatShamirThird(e, r, keys);
-
-                //4
-                check = ZeroKnowledgeProofs.FiatShamirFourth(e, y, x, keys.Item1);
-            }
             
-            Console.WriteLine("result: {0}", check);
            
 
             Console.ReadKey();

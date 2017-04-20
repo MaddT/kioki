@@ -31,7 +31,7 @@ namespace encryption.model.ZeroKnowledgeProofs
         //второй этап
         public static long FiatShamirSecond()
         {
-            return rnd1.Next(2);            
+            return rnd1.Next(2);
         }
 
         //первый этап проверки
@@ -132,6 +132,52 @@ namespace encryption.model.ZeroKnowledgeProofs
                 y0 = y1; y1 = y2;
             }
             return new Tuple<BigInteger, BigInteger, BigInteger>(x1, y1, d1);
+        }
+
+        //функция эйлера для натуральных чисел
+        public static double PHI(long n)
+        {
+            if (Prime(n)) return n - 1;
+
+            long[] simples = getSimplicityNumbers(n / 2 + 1);
+
+            //нахождение простых множителей
+            List<long[]> list = new List<long[]>();
+            int i = 0;
+            while (true)
+            {
+                if (n % simples[i] == 0)
+                {
+                    int k;
+                    for (k = 1; k < n; k++)
+                    {
+                        n /= simples[i];
+                        if (n % simples[i] != 0) break;
+                    }
+                    list.Add(new long[] { simples[i], k });
+                }
+                i++;
+                if (i >= simples.Length) break;
+            }
+
+            //вычисление ф-ии эйлера
+            double res = 1;
+            foreach (long[] item in list)
+            {
+                res *= Math.Pow(item[0], item[1]) - Math.Pow(item[0], item[1] - 1);
+                Console.WriteLine(item[0] + " - " + item[1]);
+            }
+
+            return res;
+        }
+
+        //проверка на простоту
+        public static bool Prime(long n)
+        {
+            for (int i = 2; i < n / 2; i++)
+                if (n % i == 0) return false;
+
+            return true;
         }
     }
 }
