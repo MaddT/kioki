@@ -92,13 +92,24 @@ namespace encryption
             //str = "ПолесГУ";
             time = DateTime.Now;
 
-            Console.WriteLine(ZeroKnowledgeProofs.PHI(11398));
-
+            var keys = ZeroKnowledgeProofs.GuillouQuisquaterKeys();
+            long id = ZeroKnowledgeProofs.GuillouQuisquaterGetID(keys.Item1.Item2);
+            long sp = ZeroKnowledgeProofs.GuillouQuisquaterGetSp(id, keys);
+            var rx = ZeroKnowledgeProofs.GuillouQuisquaterFirst(keys.Item1);
+            long r = rx.Item1;
+            long x = rx.Item2;
+            long e = ZeroKnowledgeProofs.GuillouQuisquaterSecond(keys.Item1);
+            long y = ZeroKnowledgeProofs.GuillouQuisquaterThird(e, r, sp, keys.Item1);
+            bool check = ZeroKnowledgeProofs.GuillouQuisquaterFourth(e, y, x, id, keys.Item1);
             per = DateTime.Now - time;
             Console.WriteLine("Estimate time(DSAK): {0}", per);
-
-            
-           
+            Console.WriteLine("v: {0}, n: {1}, s: {2}", keys.Item1.Item1, keys.Item1.Item2, keys.Item2.Item1);
+            Console.WriteLine("id: {0}", id);
+            Console.WriteLine("sp: {0}", sp);
+            Console.WriteLine("r: {0}, x: {1}", r, x);
+            Console.WriteLine("e : {0}", e);
+            Console.WriteLine("y : {0}", y);
+            Console.WriteLine("check : {0}", check);
 
             Console.ReadKey();
         }

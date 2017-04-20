@@ -13,6 +13,83 @@ namespace encryption.model.ZeroKnowledgeProofs
         private static Random rnd2 = new Random();
 
         //четвертый этап
+        public static bool GuillouQuisquaterFourth(long e, long y, long x, long id, Tuple<long, long> key)
+        {
+            long y2;
+            y2 = (long)BigInteger.ModPow(y, key.Item1, key.Item2);
+            y2 *= (long)BigInteger.ModPow(id, e, key.Item2);
+            y2 = (long)BigInteger.ModPow(y2, 1, key.Item2);
+
+            if (y2 == x) return true;
+
+            return false;
+        }
+
+        //третий этап
+        public static long GuillouQuisquaterThird(long e, long r, long sp, Tuple<long, long> key)
+        {
+            long y;
+            y = (long)BigInteger.ModPow(BigInteger.ModPow(sp, e, key.Item2) * r, 1, key.Item2);
+            return y;
+        }
+        //второй этап
+        public static long GuillouQuisquaterSecond(Tuple<long, long> key)
+        {
+            return (long)rnd1.Next((int)key.Item1 - 1) + 1;
+        }
+
+        //первый этап проверки
+        public static Tuple<long, long> GuillouQuisquaterFirst(Tuple<long, long> key)
+        {
+            long r;
+            r = rnd1.Next((int)key.Item2 - 1) + 1;
+
+            long x = (long)BigInteger.ModPow(r, key.Item1, key.Item2);
+
+            return new Tuple<long, long>(r, x);
+        }
+
+        //вычисл sp для протокола Гиллу-Кискатра
+        public static long GuillouQuisquaterGetSp(long id, Tuple<Tuple<long, long>, Tuple<long>> key)
+        {
+            long sp = 0;
+            sp = (long)BigInteger.ModPow(id, key.Item2.Item1 * (PHI(key.Item1.Item2) - 1), key.Item1.Item2);
+            return sp;
+        }
+
+        //получить идентификатор для доверенного центра
+        public static long GuillouQuisquaterGetID(long n)
+        {
+            return (long)rnd1.Next((int)n - 2) + 2;
+        }
+
+        //ключи к протоколу Гиллу-Кискатра
+        public static Tuple<Tuple<long, long>, Tuple<long>> GuillouQuisquaterKeys()
+        {
+            int p = 0, q = 0;
+            long[] array = getSimplicityNumbers(10000);
+            p = (int)array[rnd1.Next(array.Length)];
+            q = (int)array[rnd1.Next(array.Length / 2)];
+            long n = (long)p * (long)q;
+
+            long phi_n = (p - 1) * (q - 1);
+            long v;
+            do
+            {
+                v = (long)rnd1.Next((int)n - 3) + 3;
+                var aaa = EuclidEx(phi_n, v);
+                if (aaa.Item3.IsOne) break;
+            } while (true);
+
+            long s = (long)BigInteger.ModPow(v, PHI(phi_n) - 1, phi_n);
+        
+            return new Tuple<Tuple<long, long>, Tuple<long>>(
+                new Tuple<long, long>(v, n),
+                new Tuple<long>(s)
+                );
+        }
+
+        //четвертый этап
         public static bool FiatShamirFourth(long e, long y, long x, Tuple<long, long> key)
         {
             long y2 = (long)BigInteger.ModPow(x * (long)Math.Pow(key.Item1, e), 1, key.Item2);
@@ -135,7 +212,7 @@ namespace encryption.model.ZeroKnowledgeProofs
         }
 
         //функция эйлера для натуральных чисел
-        public static double PHI(long n)
+        public static long PHI(long n)
         {
             if (Prime(n)) return n - 1;
 
@@ -161,12 +238,9 @@ namespace encryption.model.ZeroKnowledgeProofs
             }
 
             //вычисление ф-ии эйлера
-            double res = 1;
+            long res = 1;
             foreach (long[] item in list)
-            {
-                res *= Math.Pow(item[0], item[1]) - Math.Pow(item[0], item[1] - 1);
-                Console.WriteLine(item[0] + " - " + item[1]);
-            }
+                res *= (long)Math.Pow(item[0], item[1]) - (long)Math.Pow(item[0], item[1] - 1);
 
             return res;
         }
