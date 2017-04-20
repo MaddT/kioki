@@ -7,6 +7,7 @@ using encryption.model.SymmetricEncryption;
 using encryption.model.AsymmetricEncryption;
 using System.Numerics;
 using encryption.model.DigitalSignature;
+using encryption.model.ZeroKnowledgeProofs;
 
 namespace encryption
 {
@@ -85,28 +86,36 @@ namespace encryption
             
             TimeSpan per = DateTime.Now - time;
             
-            string str = "My string for Dogs";
-            for (int i = 0; i < 5; i++)
-                str += str;
-            str = "ПолесГУ";
+            //string str = "My string for Dogs";
+            //for (int i = 0; i < 5; i++)
+            //    str += str;
+            //str = "ПолесГУ";
             time = DateTime.Now;
-            BigInteger n = DigitalSignature.GetSimple();
-
-            var keys = DigitalSignature.DSAKeys(KeyAmount.b16);
-            var mess = DigitalSignature.MakeDSASign(str, keys, n);
-
-            bool sd = DigitalSignature.CheckDSASign(mess, keys, n);
-            mess = new Tuple<string, BigInteger, BigInteger>("ПолемГУ", mess.Item2, mess.Item3);
-            bool sd1 = DigitalSignature.CheckDSASign(mess, keys, n);
+            var keys = ZeroKnowledgeProofs.FiatShamirKeys();
 
             per = DateTime.Now - time;
             Console.WriteLine("Estimate time(DSAK): {0}", per);
-            Console.WriteLine("DSA: ({0}, {1}, {2})", str, mess.Item2, mess.Item3);
-            Console.WriteLine("ПолесГУ -> ПолесГУ: {0}", sd);
-            Console.WriteLine("ПолесГУ -> ПолемГУ: {0}", sd1);
-            
+            Console.WriteLine("v: {0}, n: {1}, s: {2}", keys.Item1.Item1, keys.Item1.Item2, keys.Item2.Item1);
 
-            Console.WriteLine();
+            bool check = true;
+            for (int i = 0; i < 1; i++)
+            {
+                //1
+                var rx = ZeroKnowledgeProofs.FiatShamirFirst(keys.Item1);
+                long x = rx.Item2;
+                long r = rx.Item1;
+
+                //2
+                long e = ZeroKnowledgeProofs.FiatShamirSecond();
+
+                //3
+                long y = ZeroKnowledgeProofs.FiatShamirThird(e, r, keys);
+
+                //4
+                check = ZeroKnowledgeProofs.FiatShamirFourth(e, y, x, keys.Item1);
+            }
+            
+            Console.WriteLine("result: {0}", check);
            
 
             Console.ReadKey();
