@@ -36,6 +36,11 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Office.Interop.Word, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>C:\Windows\assembly\GAC_MSIL\Microsoft.Office.Interop.Word\14.0.0.0__71e9bce111e9429c\Microsoft.Office.Interop.Word.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
@@ -49,6 +54,7 @@
   <ItemGroup>
     <Compile Include="model\algorithms\AsymmetricEncryption.cs" />
     <Compile Include="model\algorithms\DigitalSignature.cs" />
+    <Compile Include="model\algorithms\Steganography.cs" />
     <Compile Include="model\algorithms\SymmetricEncryption.cs" />
     <Compile Include="model\algorithms\ZeroKnowledgeProofs.cs" />
     <Compile Include="Program.cs" />
@@ -56,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="files\variant05.docx" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="presenter\" />

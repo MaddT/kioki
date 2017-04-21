@@ -8,6 +8,8 @@ using encryption.model.AsymmetricEncryption;
 using System.Numerics;
 using encryption.model.DigitalSignature;
 using encryption.model.ZeroKnowledgeProofs;
+using System.Collections;
+using encryption.model.Steganography;
 
 namespace encryption
 {
@@ -89,24 +91,13 @@ namespace encryption
             //string str = "My string for Dogs";
             //for (int i = 0; i < 5; i++)
             //    str += str;
-            //str = "ПолесГУ";
+            string str = "нпло" + Environment.NewLine + "sdada";
             time = DateTime.Now;
+            str = Steganography.GetDocText(@"c:/variant05.docx");
+            Steganography.CreateDoc(str, @"c:/file.docx");
 
-            var keys = ZeroKnowledgeProofs.SchnorrKeys();
-            var rx = ZeroKnowledgeProofs.SchnorrFirst(keys.Item1);
-            long r = rx.Item1;
-            long x = rx.Item2;
-            long e = ZeroKnowledgeProofs.SchnorrSecond(keys.Item3.Item1);
-            long y = ZeroKnowledgeProofs.SchnorrThird(e, r, keys.Item2.Item1, keys.Item1);
-            bool check = ZeroKnowledgeProofs.SchnorrFourth(e, y, x, keys.Item1);
             per = DateTime.Now - time;
-            Console.WriteLine("Estimate time(Schnorr): {0}", per);
-            Console.WriteLine("p: {0}, q: {1}, g: {2}, v: {3}", keys.Item1.Item1, keys.Item1.Item2, keys.Item1.Item3, keys.Item1.Item4);
-            Console.WriteLine("w: {0}", keys.Item2.Item1);
-            Console.WriteLine("r: {0}, x: {1}", r, x);
-            Console.WriteLine("e: {0}", e);
-            Console.WriteLine("y: {0}", y);
-            Console.WriteLine(check);
+            Console.WriteLine("Estimate time(steg): {0}", per);
 
             Console.ReadKey();
         }
