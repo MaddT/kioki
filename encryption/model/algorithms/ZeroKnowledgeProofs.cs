@@ -12,6 +12,80 @@ namespace encryption.model.ZeroKnowledgeProofs
         private static Random rnd1 = new Random();
         private static Random rnd2 = new Random();
 
+        #region схема Шнорра
+        //четвертый этап
+        public static bool SchnorrFourth(long e, long y, long x, Tuple<long, long, long, long> key)
+        {
+            long y2;
+            y2 = (long)BigInteger.ModPow(key.Item3, y, key.Item1);
+            y2 *= (long)BigInteger.ModPow(key.Item4, e, key.Item1);
+            y2 = (long)BigInteger.ModPow(y2, 1, key.Item1);
+
+            if (y2 == x) return true;
+
+            return false;
+        }
+
+        //третий этап
+        public static long SchnorrThird(long e, long r, long s, Tuple<long, long, long, long> key)
+        {
+            long y;
+            y = (long)BigInteger.ModPow(s * e + r, 1, key.Item2);
+            return y;
+        }
+
+        //второй этап
+        public static long SchnorrSecond(long t)
+        {
+            return (long)rnd1.Next((int)Math.Pow(2, t) - 2) + 2;
+        }
+
+        //первый этап проверки
+        public static Tuple<long, long> SchnorrFirst(Tuple<long, long, long, long> key)
+        {
+            long r;
+            r = rnd1.Next((int)key.Item2 - 1) + 1;
+            long x = (long)BigInteger.ModPow(key.Item3, r, key.Item1);
+            return new Tuple<long, long>(r, x);
+        }
+
+        //генерация ключей для схемы Шнорра
+        public static Tuple<Tuple<long, long, long, long>, Tuple<long>, Tuple<long>> SchnorrKeys()
+        {
+            int p = 0, q = 0;
+            long[] array = getSimplicityNumbers(5000000);
+            do
+            {
+                int r = rnd1.Next(array.Length);
+                p = (int)array[r];
+                while (r >= 0)
+                    if ((p - 1) % array[r--] == 0)
+                    {
+                        q = (int)array[r + 1];
+                        if (q < 40) continue;
+                        goto exitLoop;
+                    }
+            } while (true);
+        exitLoop:;
+
+            long h = rnd1.Next(p - 3) + 2;
+
+            long g = (long)BigInteger.ModPow(h, (p - 1) / q, p);
+
+            long t = 30;// rnd1.Next(q - 40) + 40;
+
+            long s = rnd1.Next(q - 1) + 1;
+
+            long v = (long)BigInteger.ModPow(g, s * (PHI(p) - 1), p);
+
+            return new Tuple<Tuple<long, long, long, long>, Tuple<long>, Tuple<long>>(
+                new Tuple<long, long, long, long>(p, q, g, v),
+                new Tuple<long>(s),
+                new Tuple<long>(t));
+        }
+        #endregion
+
+        #region протокол Гиллу-Кискатра
         //четвертый этап
         public static bool GuillouQuisquaterFourth(long e, long y, long x, long id, Tuple<long, long> key)
         {
@@ -88,7 +162,9 @@ namespace encryption.model.ZeroKnowledgeProofs
                 new Tuple<long>(s)
                 );
         }
+        #endregion
 
+        #region протокол Фиата-Шамира
         //четвертый этап
         public static bool FiatShamirFourth(long e, long y, long x, Tuple<long, long> key)
         {
@@ -148,7 +224,9 @@ namespace encryption.model.ZeroKnowledgeProofs
                 new Tuple<long, long>(v, n),
                 new Tuple<long>(s));
         }
+        #endregion
 
+        #region арифметика
         //Решето Эратосфена
         private static long[] getSimplicityNumbers(long n)
         {
@@ -253,5 +331,6 @@ namespace encryption.model.ZeroKnowledgeProofs
 
             return true;
         }
+        #endregion
     }
 }
