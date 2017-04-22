@@ -10,6 +10,7 @@ using encryption.model.DigitalSignature;
 using encryption.model.ZeroKnowledgeProofs;
 using System.Collections;
 using encryption.model.Steganography;
+using System.IO;
 
 namespace encryption
 {
@@ -92,22 +93,27 @@ namespace encryption
             //for (int i = 0; i < 5; i++)
             //    str += str;
             string str = "нпло" + Environment.NewLine + "sdada";
-            Encoding1 enc = Encoding1.koi8u;
             time = DateTime.Now;
+            str = "abc234 df asdgыут м№!#$!%^ji opafn auv asdfasf sdf ;nsfgai bgfsfh ahfaasdfajlsdf asdf afgvsknqygwelo 348y [unfajo grbh@ 9тцнфc";
 
-            str = Steganography.GetDocText(@"c:/variant05.docx");
-            Steganography.CreateDoc(str, @"c:/file.docx");
-            str = "abc234 df asdgыут м№!#$!%^@ 9тцнфc";
-            Console.WriteLine(str);
-            byte[] bbb = Steganography.GetBytes(str, enc);
-            Steganography.HideBytesInDoc(bbb, @"c:/file.docx", enc);
-            time = DateTime.Now;
-            byte[] nb = Steganography.TakeBytesFromDoc(@"c:/file.docx", enc);
-            str = Steganography.GetString(nb, enc);
+            FileStream fs = new FileStream(@"../../files/warandpeace.txt", FileMode.Open);
+
+            byte[] strb = new byte[fs.Length];
+            fs.Read(strb, 0, (int)fs.Length);
+            byte[] strbz = Steganography.ZipBytes(strb);
+            fs.Close();
+
+            Steganography.HideBytesInBMP(strbz, @"../../files/sample.bmp");
+            Console.WriteLine(strbz.Length);
+            strbz = Steganography.TakesBytesFromBMP(@"../../files/sample.bmp");
+            Console.WriteLine(strbz.Length);
+            strb = Steganography.UnZipBytes(strbz);
+            fs = new FileStream(@"../../files/warandpeace1.txt", FileMode.Create);
+            fs.Write(strb, 0, strb.Length);
+            fs.Close();
 
             per = DateTime.Now - time;
             Console.WriteLine("Estimate time(steg): {0}", per);
-            Console.WriteLine(str);
 
             Console.ReadKey();
         }

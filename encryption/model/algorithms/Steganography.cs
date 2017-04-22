@@ -8,10 +8,10 @@ using Microsoft.Office.Interop.Word;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-//using System.Windows.Forms;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Numerics;
+using System.IO.Compression;
 
 namespace encryption.model.Steganography
 {
@@ -20,6 +20,208 @@ namespace encryption.model.Steganography
     public static class Steganography
     {
         private static Random rnd = new Random();
+
+        //извлекает байтовый массив из bmp24
+        public static byte[] TakesBytesFromBMP(string path)
+        {
+            Bitmap bmp = new Bitmap(path);
+            int width = bmp.Width;
+            int height = bmp.Height;
+            bmp.Dispose();
+
+            int space = width % 4;
+            FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
+            fs.Seek(10, SeekOrigin.Begin);
+            byte[] bytes = new byte[4];
+            fs.Read(bytes, 0, 4);
+            BigInteger big = new BigInteger(bytes);
+            fs.Seek((long)big, SeekOrigin.Begin);
+            byte[] buff = new byte[3 * width];
+
+            uint symbCount = 0;
+            for (int i = 0; i < 16; i++)
+            {
+                byte bbb = (byte)fs.ReadByte();
+                bbb <<= 6;
+                bbb >>= 6;
+                symbCount |= bbb;
+                if (i != 15) symbCount <<= 2;
+            }
+
+            fs.Seek((long)(big + 16), SeekOrigin.Begin);     //начало считывания символов
+            byte[] symbs = new byte[symbCount];
+            int K = 1;
+            int nn = 0;
+            int ll = 0;
+            while (width >= K)
+            {
+                if (K == 1) fs.Read(buff, 0, 3 * width - 16);
+                else fs.Read(buff, 0, 3 * width);
+                for (int i = 0; i < buff.Length - (K == 1 ? 16 : 0); i++)
+                {
+                    buff[i] <<= 6;
+                    buff[i] >>= 6;
+                    switch (ll)
+                    {
+                        case 0:
+                            symbs[nn] |= buff[i];
+                            symbs[nn] <<= 2;
+                            ll++;
+                            break;
+                        case 1:
+                            symbs[nn] |= buff[i];
+                            symbs[nn] <<= 2;
+                            ll++;
+                            break;
+                        case 2:
+                            symbs[nn] |= buff[i];
+                            symbs[nn] <<= 2;
+                            ll++;
+                            break;
+                        case 3:
+                            symbs[nn] |= buff[i];
+                            ll = 0;
+                            nn++;
+                            if (nn >= symbs.Length)
+                                goto dads;
+                            break;
+                    }
+                }
+                fs.Seek(space, SeekOrigin.Current);
+                K++;
+            }
+        dads:;
+
+
+            fs.Close();
+            return symbs;
+
+        }
+
+        //прячет поток байтов в графический файл bmp24
+        public static void HideBytesInBMP(byte[] bytes, string path)
+        {
+            Bitmap bmp = new Bitmap(path);
+            int width = bmp.Width;
+            int height = bmp.Height;
+            bmp.Dispose();
+
+            int space = width % 4;
+            FileStream fs = new FileStream(path, FileMode.Open, FileAccess.ReadWrite);
+            fs.Seek(10, SeekOrigin.Begin);
+            byte[] bytesn = new byte[4]; 
+            fs.Read(bytesn, 0, 4);
+            BigInteger big = new BigInteger(bytesn);
+            fs.Seek((long)big, SeekOrigin.Begin);
+            byte[] buff = new byte[3 * width];
+
+            Console.WriteLine("кол-во байт возм.: {0}", width * height * 3 / 4);
+            Console.WriteLine("bytes: {0}", bytes.Length + 2);
+
+            //формирование байтового массива
+            byte[] symbs = bytes;
+            byte[] symbsTemp = new byte[symbs.Length + 4];
+            uint symbCount = (uint)symbs.Length;
+            symbsTemp[0] |= (byte)(symbCount >> 24);
+            symbsTemp[1] |= (byte)(symbCount >> 16);
+            symbsTemp[2] |= (byte)(symbCount >> 8);
+            symbsTemp[3] |= (byte)symbCount;
+            for (int i = 4; i < symbsTemp.Length; i++)
+                symbsTemp[i] = symbs[i - 4];
+            symbs = symbsTemp;
+
+            //запись битов
+            int K = 1;
+            int nn = 0;
+            int ll = 0;
+            StringBuilder strRes = new StringBuilder();
+            while (width >= K)
+            {
+                fs.Read(buff, 0, 3 * width);
+
+                for (int i = 0; i < buff.Length; i++)
+                {
+                    buff[i] >>= 2;
+                    buff[i] <<= 2;
+                    byte bbb;
+                    switch (ll)
+                    {
+                        case 0:
+                            buff[i] |= (byte)(symbs[nn] >> 6);
+                            ll++;
+                            break;
+                        case 1:
+                            bbb = (byte)(symbs[nn] << 2);
+                            buff[i] |= (byte)(bbb >> 6);
+                            ll++;
+                            break;
+                        case 2:
+                            bbb = (byte)(symbs[nn] << 4);
+                            buff[i] |= (byte)(bbb >> 6);
+                            ll++;
+                            break;
+                        case 3:
+                            bbb = (byte)(symbs[nn] << 6);
+                            buff[i] |= (byte)(bbb >> 6);
+                            ll = 0;
+                            nn++;
+                            if (nn >= symbs.Length)
+                            {
+                                fs.Seek(-3 * width, SeekOrigin.Current);
+                                fs.Write(buff, 0, 3 * width);
+                                goto dads;
+                            }
+                            break;
+                    }
+                }
+                fs.Seek(-3 * width, SeekOrigin.Current);
+                fs.Write(buff, 0, 3 * width);
+                fs.Seek(space, SeekOrigin.Current);
+                K++;
+            }
+        dads:;
+
+            fs.Close();
+        }
+
+        //распаковывает поток байтов
+        public static byte[] UnZipBytes(byte[] gzip)
+        {
+            byte[] res;
+            using (MemoryStream originalFileStream = new  MemoryStream(gzip))
+            {
+                using (MemoryStream decompressedFileStream = new MemoryStream())
+                {
+                    using (GZipStream decompressionStream = new GZipStream(originalFileStream, CompressionMode.Decompress))
+                    {
+                        decompressionStream.CopyTo(decompressedFileStream);
+                    }
+                    res = decompressedFileStream.ToArray();
+                }
+            }
+
+            return res;
+        }
+
+        //упаковывает поток байтов
+        public static byte[] ZipBytes(byte[] bs)
+        {
+            byte[] res;
+            using (MemoryStream sourceStream = new MemoryStream(bs))
+            {
+                using (MemoryStream targetStream = new MemoryStream())
+                {
+                    using (GZipStream compressionStream = new GZipStream(targetStream, CompressionMode.Compress))
+                    {
+                        sourceStream.CopyTo(compressionStream);
+                        
+                    }
+                    res = targetStream.ToArray();
+                }
+            }
+
+            return res;
+        }
 
         //извлекает байтовый массив из docx файла
         public static byte[] TakeBytesFromDoc(string path, Encoding1 enc = Encoding1.Unicode)
