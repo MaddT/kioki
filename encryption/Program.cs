@@ -85,22 +85,32 @@ namespace encryption
             Console.WriteLine("После дешифровки:     {0}\n", res);
             */
             DateTime time = DateTime.Now;
-            
+
             TimeSpan per = DateTime.Now - time;
-            
+
             //string str = "My string for Dogs";
             //for (int i = 0; i < 5; i++)
             //    str += str;
             string str = "нпло" + Environment.NewLine + "sdada";
+            Encoding1 enc = Encoding1.koi8u;
             time = DateTime.Now;
+
             str = Steganography.GetDocText(@"c:/variant05.docx");
             Steganography.CreateDoc(str, @"c:/file.docx");
+            str = "abc234 df asdgыут м№!#$!%^@ 9тцнфc";
+            Console.WriteLine(str);
+            byte[] bbb = Steganography.GetBytes(str, enc);
+            Steganography.HideBytesInDoc(bbb, @"c:/file.docx", enc);
+            time = DateTime.Now;
+            byte[] nb = Steganography.TakeBytesFromDoc(@"c:/file.docx", enc);
+            str = Steganography.GetString(nb, enc);
 
             per = DateTime.Now - time;
             Console.WriteLine("Estimate time(steg): {0}", per);
+            Console.WriteLine(str);
 
             Console.ReadKey();
         }
-        
+
     }
 }
